@@ -14,17 +14,27 @@ var db *gorm.DB
 
 // GetUser Function for user
 func GetUser(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "GET":
+		persons := models.Users{}
+		db.Find(&persons)
 
-	persons := models.Users{}
-	db.Find(&persons)
-
-	js, err := json.Marshal(persons)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		js, err := json.Marshal(persons)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(js)
+	case "PUT":
+		person := models.User{}
+		err := json.NewDecoder(r.Body).Decode(&person)
+		if err != nil {
+			panic(err)
+		}
+		db.Save(&person)
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(js)
+
 }
 
 func main() {
