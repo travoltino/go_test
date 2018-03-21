@@ -23,7 +23,6 @@ type Config struct {
 	WebServer struct {
 		Port int `yaml:"port"`
 	}
-	TestVal string `yaml:"testval"`
 }
 
 // GetUser Function for user
