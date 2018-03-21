@@ -2,15 +2,29 @@ package main
 
 import (
 	"encoding/json"
-	"log"
+	"io/ioutil"
 	"net/http"
+	"strconv"
 
 	"./core"
 	"./models"
 	"github.com/jinzhu/gorm"
+	yaml "gopkg.in/yaml.v2"
 )
 
 var db *gorm.DB
+
+// Config wet
+type Config struct {
+	Appname string `yaml:"appname"`
+	Db      struct {
+		Filename string `yaml:"filename"`
+	}
+	WebServer struct {
+		Port int `yaml:"port"`
+	}
+	TestVal string `yaml:"testval"`
+}
 
 // GetUser Function for user
 func GetUser(w http.ResponseWriter, r *http.Request) {
@@ -37,14 +51,24 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func main() {
-	ldb, err := core.InitDB()
-	if err != nil {
-		log.Panic(err)
+func check(e error) {
+	if e != nil {
+		panic(e)
 	}
-	db = ldb
+}
+
+func main() {
+	var err error
+	db, err = core.InitDB()
+	check(err)
+
+	yamlFile, err := ioutil.ReadFile("conf/config.yml")
+	check(err)
+	config := Config{}
+	err = yaml.Unmarshal(yamlFile, &config)
+	check(err)
 
 	http.HandleFunc("/user", GetUser)
-	http.ListenAndServe(":8000", nil)
-
+	listen := ":" + strconv.Itoa(config.WebServer.Port)
+	http.ListenAndServe(listen, nil)
 }

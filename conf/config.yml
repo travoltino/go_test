@@ -1,0 +1,7 @@
+appname: go_test
+
+db:
+    filename: test.db
+
+webserver:
+  port: 8000
